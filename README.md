@@ -1,8 +1,18 @@
 # pi-codex-account
 
-Pi extension for switching between multiple OpenAI Codex OAuth accounts and checking usage for the active account.
+[![npm version](https://img.shields.io/npm/v/pi-codex-account?color=cb3837&logo=npm)](https://www.npmjs.com/package/pi-codex-account)
+[![install with pi](https://img.shields.io/badge/pi-install%20npm%3Api--codex--account-5b5bd6)](https://pi.dev/packages)
+[![GitHub release](https://img.shields.io/github/v/release/fadilsflow/pi-codex-account?logo=github)](https://github.com/fadilsflow/pi-codex-account/releases)
+[![CI](https://github.com/fadilsflow/pi-codex-account/actions/workflows/ci.yml/badge.svg)](https://github.com/fadilsflow/pi-codex-account/actions/workflows/ci.yml)
+[![license](https://img.shields.io/github/license/fadilsflow/pi-codex-account)](LICENSE)
 
-Pi currently stores one `openai-codex` OAuth credential in `~/.pi/agent/auth.json`. This extension keeps named snapshots of those credentials in `~/.pi/agent/codex-accounts.json` and swaps the active credential on demand.
+Pi extension for switching between multiple OpenAI Codex OAuth accounts and
+checking usage for the active account.
+
+Pi currently stores one `openai-codex` OAuth credential in
+`~/.pi/agent/auth.json`. This extension keeps named snapshots of those
+credentials in `~/.pi/agent/codex-accounts.json` and swaps the active
+credential on demand.
 
 ## Features
 
@@ -16,13 +26,19 @@ Pi currently stores one `openai-codex` OAuth credential in `~/.pi/agent/auth.jso
 
 ## Install
 
-From a local checkout:
+Install the public npm package with Pi:
 
 ```bash
-pi install /path/to/pi-codex-account
+pi install npm:pi-codex-account
 ```
 
 For one-off testing without installing:
+
+```bash
+pi -e npm:pi-codex-account
+```
+
+For local development from a checkout:
 
 ```bash
 pi -e /path/to/pi-codex-account
