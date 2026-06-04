@@ -22,6 +22,7 @@
   "homepage": "https://github.com/fadilsflow/pi-codex-account#readme",
   "files": [
     "src",
+    "assets",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"

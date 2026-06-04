@@ -6,6 +6,8 @@
 [![CI](https://github.com/fadilsflow/pi-codex-account/actions/workflows/ci.yml/badge.svg)](https://github.com/fadilsflow/pi-codex-account/actions/workflows/ci.yml)
 [![license](https://img.shields.io/github/license/fadilsflow/pi-codex-account)](LICENSE)
 
+![pi-codex-account terminal preview](assets/thumbnail.svg)
+
 Pi extension for switching between multiple OpenAI Codex OAuth accounts and
 checking usage for the active account.
 

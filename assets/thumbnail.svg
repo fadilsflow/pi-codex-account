@@ -1,0 +1,93 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">pi-codex-account thumbnail</title>
+  <desc id="desc">A polished terminal-style preview for a Pi extension that switches OpenAI Codex accounts and shows usage.</desc>
+  <defs>
+    <radialGradient id="bg-a" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1060 70) rotate(140) scale(850 650)">
+      <stop stop-color="#5B5BD6" stop-opacity="0.68"/>
+      <stop offset="0.48" stop-color="#151828" stop-opacity="0.94"/>
+      <stop offset="1" stop-color="#06070B"/>
+    </radialGradient>
+    <radialGradient id="bg-b" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(135 540) rotate(-24) scale(710 400)">
+      <stop stop-color="#10B981" stop-opacity="0.35"/>
+      <stop offset="0.52" stop-color="#0B1020" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#05060A" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="card" x1="118" y1="94" x2="1011" y2="574" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#111827" stop-opacity="0.92"/>
+      <stop offset="1" stop-color="#0B1020" stop-opacity="0.88"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="774" y1="120" x2="1042" y2="432" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#60A5FA"/>
+      <stop offset="0.5" stop-color="#A78BFA"/>
+      <stop offset="1" stop-color="#34D399"/>
+    </linearGradient>
+    <filter id="shadow" x="72" y="58" width="1056" height="560" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="24" stdDeviation="34" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+    <filter id="glow" x="696" y="66" width="377" height="377" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="30"/>
+    </filter>
+    <style>
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+      .sans { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="630" fill="#05060A"/>
+  <rect width="1200" height="630" fill="url(#bg-a)"/>
+  <rect width="1200" height="630" fill="url(#bg-b)"/>
+
+  <g opacity="0.18">
+    <path d="M-14 516C156 432 238 488 383 414C527 340 499 223 682 181C850 142 958 178 1228 62" stroke="#93C5FD" stroke-width="2"/>
+    <path d="M-8 552C186 481 250 546 414 484C580 421 565 300 736 253C903 207 1008 235 1217 147" stroke="#34D399" stroke-width="2"/>
+  </g>
+
+  <g filter="url(#glow)" opacity="0.58">
+    <circle cx="885" cy="255" r="126" fill="url(#accent)"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="94" y="74" width="1012" height="520" rx="34" fill="url(#card)" stroke="#2A3448" stroke-width="1.5"/>
+    <rect x="94" y="74" width="1012" height="58" rx="34" fill="#151C2E"/>
+    <path d="M94 132H1106" stroke="#263247"/>
+    <circle cx="136" cy="103" r="8" fill="#FF6B6B"/>
+    <circle cx="164" cy="103" r="8" fill="#FBBF24"/>
+    <circle cx="192" cy="103" r="8" fill="#34D399"/>
+    <text x="236" y="110" class="mono" font-size="18" fill="#8FA3BF">pi-codex-account</text>
+
+    <text x="140" y="194" class="sans" font-size="54" font-weight="800" fill="#F8FAFC">Switch Codex accounts</text>
+    <text x="140" y="238" class="sans" font-size="24" fill="#A8B3C7">Save profiles, swap identities, and check usage from Pi.</text>
+
+    <g transform="translate(140 286)">
+      <rect width="486" height="196" rx="22" fill="#080D18" stroke="#263247"/>
+      <text x="28" y="48" class="mono" font-size="22" fill="#7DD3FC">/codex list</text>
+      <text x="28" y="92" class="mono" font-size="24" fill="#E2E8F0">● work</text>
+      <text x="170" y="92" class="mono" font-size="22" fill="#94A3B8">240a69…f30e</text>
+      <text x="350" y="92" class="mono" font-size="20" fill="#34D399">active</text>
+      <text x="28" y="134" class="mono" font-size="24" fill="#CBD5E1">  personal</text>
+      <text x="210" y="134" class="mono" font-size="22" fill="#94A3B8">3be6f7…e2ce</text>
+      <text x="28" y="174" class="mono" font-size="22" fill="#7DD3FC">/codex switch personal</text>
+    </g>
+
+    <g transform="translate(686 286)">
+      <rect width="360" height="196" rx="22" fill="#080D18" stroke="#263247"/>
+      <text x="28" y="48" class="mono" font-size="22" fill="#7DD3FC">/codex usage</text>
+      <text x="28" y="88" class="mono" font-size="20" fill="#CBD5E1">5h limit</text>
+      <rect x="146" y="70" width="258" height="18" rx="9" fill="#1F2A44"/>
+      <rect x="146" y="70" width="235" height="18" rx="9" fill="#34D399"/>
+      <text x="28" y="128" class="mono" font-size="20" fill="#CBD5E1">weekly</text>
+      <rect x="146" y="110" width="258" height="18" rx="9" fill="#1F2A44"/>
+      <rect x="146" y="110" width="188" height="18" rx="9" fill="#60A5FA"/>
+      <text x="28" y="168" class="mono" font-size="20" fill="#94A3B8">no footer noise</text>
+    </g>
+
+    <g transform="translate(140 520)">
+      <rect width="276" height="42" rx="21" fill="#172033" stroke="#31415D"/>
+      <text x="25" y="28" class="mono" font-size="18" fill="#C4B5FD">npm:pi-codex-account</text>
+    </g>
+    <g transform="translate(440 520)">
+      <rect width="142" height="42" rx="21" fill="#09261D" stroke="#16653F"/>
+      <text x="26" y="28" class="mono" font-size="18" fill="#86EFAC">/codex</text>
+    </g>
+  </g>
+</svg>
