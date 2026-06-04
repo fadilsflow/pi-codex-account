@@ -12,6 +12,14 @@
   ],
   "license": "MIT",
   "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fadilsflow/pi-codex-account.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fadilsflow/pi-codex-account/issues"
+  },
+  "homepage": "https://github.com/fadilsflow/pi-codex-account#readme",
   "files": [
     "src",
     "README.md",
