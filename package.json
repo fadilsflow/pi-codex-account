@@ -1,6 +1,6 @@
 {
   "name": "pi-codex-account",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Pi extension to switch between multiple OpenAI Codex OAuth accounts and show usage for the active account.",
   "type": "module",
   "keywords": [

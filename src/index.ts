@@ -817,14 +817,20 @@ export default function (pi: ExtensionAPI) {
           .map((s) => ({ value: s, label: s }));
         return items.length > 0 ? items : null;
       }
-      // Completing a label for switch/rename/remove.
+      // Completing a label for switch/rename/remove. Pi replaces the full
+      // command argument string with the selected completion value, so include
+      // the subcommand prefix. Returning only the label would turn
+      // `/codex rename old new` into `/codex old`.
       const sub = tokens[0];
       if (sub === "switch" || sub === "remove" || sub === "rename") {
+        // Do not complete the new name in `rename <old> <new>`; it is free text.
+        if (sub === "rename" && tokens.length > 2) return null;
+
         const labelPrefix = tokens[1] ?? "";
         const labels = Object.keys(loadStore().accounts).sort();
         const items = labels
           .filter((l) => l.startsWith(labelPrefix))
-          .map((l) => ({ value: l, label: l }));
+          .map((l) => ({ value: `${sub} ${l}`, label: l }));
         return items.length > 0 ? items : null;
       }
       return null;
