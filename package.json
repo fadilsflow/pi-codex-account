@@ -1,0 +1,37 @@
+{
+  "name": "pi-codex-account",
+  "version": "0.1.0",
+  "description": "Pi extension to switch between multiple OpenAI Codex OAuth accounts and show usage for the active account.",
+  "type": "module",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "codex",
+    "openai",
+    "oauth"
+  ],
+  "license": "MIT",
+  "author": "",
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "pi": {
+    "extensions": [
+      "./src/index.ts"
+    ]
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "latest",
+    "@types/bun": "latest",
+    "typescript": "^5.9.3"
+  }
+}
