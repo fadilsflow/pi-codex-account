@@ -1,33 +1,8 @@
-/**
- * codex-accounts — switch between multiple OpenAI Codex (ChatGPT) logins in pi.
- *
- * pi only stores ONE set of `openai-codex` OAuth credentials in auth.json at a
- * time. This extension keeps named snapshots of those credentials in its own
- * store (~/.pi/agent/codex-accounts.json) and lets you swap which one is active.
- *
- * Commands:
- *   /codex                 Interactive: pick an account to switch to
- *   /codex list            List saved accounts (active one marked)
- *   /codex current         Show which account is active right now
- *   /codex save <label>    Snapshot the CURRENT logged-in codex creds
- *   /codex switch <label>  Make <label> the active codex account
- *   /codex usage           Show usage for the active account
- *   /codex rename <a> <b>  Rename account <a> to <b>
- *   /codex remove <label>  Delete a saved account
- *
- * Typical flow:
- *   1. /login openai-codex            (log in to account #1)
- *   2. /codex save work               (snapshot it as "work")
- *   3. /login openai-codex            (log in to account #2 — overwrites auth.json)
- *   4. /codex save personal           (snapshot it as "personal")
- *   5. /codex switch work             (swap back to account #1 — auto reloads)
- *   6. /codex usage                   (show usage for the active account)
- */
+/** Switch between saved OpenAI Codex OAuth credential snapshots in pi. */
 
 import type {
   ExtensionAPI,
   ExtensionCommandContext,
-  ExtensionContext,
 } from "@earendil-works/pi-coding-agent";
 import {
   chmodSync,
@@ -46,6 +21,20 @@ const DEFAULT_USAGE_TIMEOUT_MS = 15_000;
 const BAR_SEGMENTS = 20;
 const LIMIT_VALUE_COLUMN = 29;
 const MAX_ERROR_BODY_CHARS = 600;
+const SUBCOMMANDS = [
+  "list",
+  "current",
+  "save",
+  "switch",
+  "usage",
+  "rename",
+  "remove",
+] as const;
+const LABEL_COMPLETION_SUBCOMMANDS = new Set<string>([
+  "switch",
+  "remove",
+  "rename",
+]);
 
 /** Shape of an `openai-codex` OAuth credential as stored in auth.json. */
 export interface CodexCredential {
@@ -130,20 +119,21 @@ function writeJsonFileSecure(path: string, data: unknown): void {
   }
 }
 
+function isCodexCredential(value: unknown): value is CodexCredential {
+  if (!value || typeof value !== "object") return false;
+  const credential = value as Record<string, unknown>;
+  return (
+    credential.type === "oauth" &&
+    typeof credential.access === "string" &&
+    typeof credential.refresh === "string"
+  );
+}
+
 /** Read the currently-active openai-codex credential from auth.json, if any. */
 function readActiveCodexCredential(): CodexCredential | undefined {
   const auth = readJsonFile<Record<string, unknown>>(getAuthPath(), {});
-  const cred = auth[CODEX_PROVIDER_ID];
-  if (
-    cred &&
-    typeof cred === "object" &&
-    (cred as Record<string, unknown>).type === "oauth" &&
-    typeof (cred as Record<string, unknown>).access === "string" &&
-    typeof (cred as Record<string, unknown>).refresh === "string"
-  ) {
-    return cred as CodexCredential;
-  }
-  return undefined;
+  const credential = auth[CODEX_PROVIDER_ID];
+  return isCodexCredential(credential) ? credential : undefined;
 }
 
 /**
@@ -240,13 +230,26 @@ function summarizeAccount(label: string, acct: SavedAccount): string {
   return `${label} — ${id} (${exp})`;
 }
 
+function sortedAccountLabels(store: AccountsStore) {
+  return Object.keys(store.accounts).sort();
+}
+
+function formatAccountOption(
+  label: string,
+  account: SavedAccount,
+  activeLabel: string | undefined,
+) {
+  const marker = label === activeLabel ? "● " : "  ";
+  return marker + summarizeAccount(label, account);
+}
+
 // ---------------------------------------------------------------------------
 // Command implementations
 // ---------------------------------------------------------------------------
 
 function doList(ctx: ExtensionCommandContext): void {
   const store = loadStore();
-  const labels = Object.keys(store.accounts).sort();
+  const labels = sortedAccountLabels(store);
   const active = readActiveCodexCredential();
   const activeLabel = detectActiveLabel(store, active);
 
@@ -258,10 +261,9 @@ function doList(ctx: ExtensionCommandContext): void {
     return;
   }
 
-  const lines = labels.map((label) => {
-    const marker = label === activeLabel ? "● " : "  ";
-    return marker + summarizeAccount(label, store.accounts[label]!);
-  });
+  const lines = labels.map((label) =>
+    formatAccountOption(label, store.accounts[label]!, activeLabel),
+  );
   ctx.ui.setWidget("codex-accounts", [
     "Codex accounts (● = active):",
     ...lines,
@@ -325,7 +327,7 @@ async function doSwitch(
   const store = loadStore();
   const acct = store.accounts[label];
   if (!acct) {
-    const known = Object.keys(store.accounts).sort().join(", ") || "(none)";
+    const known = sortedAccountLabels(store).join(", ") || "(none)";
     ctx.ui.notify(
       `No saved account "${label}". Known accounts: ${known}.`,
       "warning",
@@ -404,10 +406,6 @@ async function doUsage(ctx: ExtensionCommandContext): Promise<void> {
     return;
   }
 
-  // Do not write usage to the footer/statusline. The full terminal output is
-  // the source of truth; footer summaries can be misleading for multi-window
-  // limits.
-  ctx.ui.setStatus("codex-accounts-usage", undefined);
   try {
     const report = await queryCodexUsage(active, DEFAULT_USAGE_TIMEOUT_MS);
     ctx.ui.notify(formatUsageReport(report, active), "info");
@@ -432,7 +430,6 @@ export type UsageSnapshot = {
 
 export type UsageWindow = {
   usedPercent: number;
-  windowMinutes?: number;
   resetsAt?: number;
 };
 
@@ -551,13 +548,8 @@ function normalizeUsageWindow(value: unknown): UsageWindow | undefined {
   const window = assertObject(value, "rate-limit window");
   const usedPercent = asNumber(window.used_percent);
   if (usedPercent === undefined) return undefined;
-  const limitSeconds = asNumber(window.limit_window_seconds);
   const resetsAt = asNumber(window.reset_at);
-  return {
-    usedPercent,
-    windowMinutes: limitSeconds && limitSeconds > 0 ? Math.ceil(limitSeconds / 60) : undefined,
-    resetsAt,
-  };
+  return { usedPercent, resetsAt };
 }
 
 function normalizeUsageCredits(value: unknown): UsageCredits | undefined {
@@ -636,16 +628,16 @@ function formatReset(epochSeconds: number): string {
 }
 
 function formatPlanType(planType: string): string {
-  const key = planType
-    .replace(/([a-z])([A-Z])/g, "$1_$2")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_");
+  const words = planType.replace(/([a-z])([A-Z])/g, "$1 $2");
+  const key = words.toLowerCase().replace(/[^a-z0-9]+/g, "_");
   if (key === "pro_lite" || key === "prolite") return "Pro Lite";
   if (key === "team" || key === "self_serve_business_usage_based" || key === "business") return "Business";
   if (key === "enterprise_cbp_usage_based") return "Enterprise";
-  return planType
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
-    .replace(/[_-]+/g, " ")
+  return titleCaseWords(words.replace(/[_-]+/g, " "));
+}
+
+function titleCaseWords(value: string): string {
+  return value
     .trim()
     .split(/\s+/)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
@@ -663,7 +655,7 @@ function normalizedUsageKey(value: string | undefined): string | undefined {
 function parseJsonObject(text: string, description: string): Record<string, unknown> {
   let parsed: unknown;
   try {
-    parsed = JSON.parse(text) as unknown;
+    parsed = JSON.parse(text);
   } catch (error) {
     throw new Error(`${description} was not valid JSON: ${errorMessage(error)}`);
   }
@@ -744,7 +736,7 @@ function doRemove(ctx: ExtensionCommandContext, label: string): void {
 
 async function doInteractive(ctx: ExtensionCommandContext): Promise<void> {
   const store = loadStore();
-  const labels = Object.keys(store.accounts).sort();
+  const labels = sortedAccountLabels(store);
   if (labels.length === 0) {
     ctx.ui.notify(
       "No saved Codex accounts yet. Log in (/login openai-codex), then run /codex save <label>.",
@@ -755,10 +747,9 @@ async function doInteractive(ctx: ExtensionCommandContext): Promise<void> {
   const active = readActiveCodexCredential();
   const activeLabel = detectActiveLabel(store, active);
 
-  const options = labels.map((label) => {
-    const marker = label === activeLabel ? "● " : "  ";
-    return marker + summarizeAccount(label, store.accounts[label]!);
-  });
+  const options = labels.map((label) =>
+    formatAccountOption(label, store.accounts[label]!, activeLabel),
+  );
 
   const choice = await ctx.ui.select("Switch to Codex account:", options);
   if (!choice) return;
@@ -788,31 +779,14 @@ export function tokenize(args: string): string[] {
 // ---------------------------------------------------------------------------
 
 export default function (pi: ExtensionAPI) {
-  const clearUsageStatuslines = (ctx: ExtensionCommandContext | ExtensionContext) => {
-    ctx.ui.setStatus("codex-accounts-usage", undefined);
-  };
-
-  pi.on("session_start", (_event, ctx) => clearUsageStatuslines(ctx));
-  pi.on("model_select", (_event, ctx) => clearUsageStatuslines(ctx));
-  pi.on("session_shutdown", (_event, ctx) => clearUsageStatuslines(ctx));
-
   const command = {
     description:
       "Switch between multiple OpenAI Codex logins and show usage (save/switch/usage/list/current/rename/remove)",
     getArgumentCompletions: (prefix: string) => {
-      const subcommands = [
-        "list",
-        "current",
-        "save",
-        "switch",
-        "usage",
-        "rename",
-        "remove",
-      ];
       const tokens = prefix.split(/\s+/);
       // Completing the subcommand itself.
       if (tokens.length <= 1) {
-        const items = subcommands
+        const items = SUBCOMMANDS
           .filter((s) => s.startsWith(tokens[0] ?? ""))
           .map((s) => ({ value: s, label: s }));
         return items.length > 0 ? items : null;
@@ -821,13 +795,13 @@ export default function (pi: ExtensionAPI) {
       // command argument string with the selected completion value, so include
       // the subcommand prefix. Returning only the label would turn
       // `/codex rename old new` into `/codex old`.
-      const sub = tokens[0];
-      if (sub === "switch" || sub === "remove" || sub === "rename") {
+      const sub = tokens[0] ?? "";
+      if (LABEL_COMPLETION_SUBCOMMANDS.has(sub)) {
         // Do not complete the new name in `rename <old> <new>`; it is free text.
         if (sub === "rename" && tokens.length > 2) return null;
 
         const labelPrefix = tokens[1] ?? "";
-        const labels = Object.keys(loadStore().accounts).sort();
+        const labels = sortedAccountLabels(loadStore());
         const items = labels
           .filter((l) => l.startsWith(labelPrefix))
           .map((l) => ({ value: `${sub} ${l}`, label: l }));

@@ -103,12 +103,10 @@ describe("usage normalization", () => {
         rate_limit: {
           primary_window: {
             used_percent: 25,
-            limit_window_seconds: 18_000,
             reset_at: 1_700_000_000,
           },
           secondary_window: {
             used_percent: 50,
-            limit_window_seconds: 604_800,
             reset_at: 1_700_100_000,
           },
         },
