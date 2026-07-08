@@ -353,13 +353,19 @@ async function doSwitch(
   store.active = label;
   saveStore(store);
 
+  // Pi keeps auth.json in memory for the lifetime of the process. A plain
+  // ctx.reload() reloads extensions/resources, but does not re-read auth.json,
+  // so force the model registry's auth storage to pick up the swapped account
+  // before the reload. The next Codex API call will then refresh this account
+  // because writeActiveCodexCredential intentionally set expires: 0.
+  ctx.modelRegistry.authStorage.reload();
+  ctx.modelRegistry.refresh();
+
   ctx.ui.notify(
     `Switched to Codex account "${label}" — ${shortAccountId(acct.credential)}. Reloading…`,
     "info",
   );
 
-  // Reload so the model registry / providers re-resolve. The next Codex API
-  // call triggers a token refresh that re-reads auth.json from disk.
   await ctx.reload();
 }
 
